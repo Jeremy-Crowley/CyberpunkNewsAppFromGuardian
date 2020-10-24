@@ -46,7 +46,7 @@ public final class Utility {
                     String section = currentNewsStory.getString("sectionName");
                     String date = currentNewsStory.getString("webPublicationDate");
 
-                    NewsStory story = new NewsStory(title, author, webAddress, section, date);
+                    NewsStory story = new NewsStory(title, author,  date, webAddress, section);
                     stories.add(story);
                 }
             }
