@@ -1,28 +1,145 @@
 package com.example.android.cyberpunknewsappfromguardian;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * helper methods related to requesting and receiving news storys from the Guardian API
+ */
 public final class Utility {
-    private static final String SAMPLE_JSON_RESPONSE = "{\"response\":{\"status\":\"ok\",\"userTier\":\"developer\",\"total\":171210,\"startIndex\":1,\"pageSize\":10,\"currentPage\":1,\"pages\":17121,\"orderBy\":\"relevance\",\"results\":[{\"id\":\"lifeandstyle/ng-interactive/2020/oct/17/stephen-collins-on-the-us-election-cartoon\",\"type\":\"interactive\",\"sectionId\":\"lifeandstyle\",\"sectionName\":\"Life and style\",\"webPublicationDate\":\"2020-10-17T05:00:13Z\",\"webTitle\":\"Stephen Collins on the US election – cartoon\",\"webUrl\":\"https://www.theguardian.com/lifeandstyle/ng-interactive/2020/oct/17/stephen-collins-on-the-us-election-cartoon\",\"apiUrl\":\"https://content.guardianapis.com/lifeandstyle/ng-interactive/2020/oct/17/stephen-collins-on-the-us-election-cartoon\",\"isHosted\":false,\"pillarId\":\"pillar/lifestyle\",\"pillarName\":\"Lifestyle\"},{\"id\":\"us-news/2020/oct/15/rudy-giuliani-daughter-endorses-joe-biden\",\"type\":\"article\",\"sectionId\":\"us-news\",\"sectionName\":\"US news\",\"webPublicationDate\":\"2020-10-16T06:57:48Z\",\"webTitle\":\"US election: Rudy Giuliani's daughter endorses Joe Biden\",\"webUrl\":\"https://www.theguardian.com/us-news/2020/oct/15/rudy-giuliani-daughter-endorses-joe-biden\",\"apiUrl\":\"https://content.guardianapis.com/us-news/2020/oct/15/rudy-giuliani-daughter-endorses-joe-biden\",\"isHosted\":false,\"pillarId\":\"pillar/news\",\"pillarName\":\"News\"},{\"id\":\"world/2020/oct/17/new-zealand-election-voters-head-to-the-polls-as-ardern-collins-call-halt-to-campaign\",\"type\":\"article\",\"sectionId\":\"world\",\"sectionName\":\"World news\",\"webPublicationDate\":\"2020-10-17T02:32:59Z\",\"webTitle\":\"New Zealand election: voters head to the polls\",\"webUrl\":\"https://www.theguardian.com/world/2020/oct/17/new-zealand-election-voters-head-to-the-polls-as-ardern-collins-call-halt-to-campaign\",\"apiUrl\":\"https://content.guardianapis.com/world/2020/oct/17/new-zealand-election-voters-head-to-the-polls-as-ardern-collins-call-halt-to-campaign\",\"isHosted\":false,\"pillarId\":\"pillar/news\",\"pillarName\":\"News\"},{\"id\":\"australia-news/2020/oct/09/kidnap-plot-charges-sharpen-fears-of-election-unrest\",\"type\":\"article\",\"sectionId\":\"australia-news\",\"sectionName\":\"Australia news\",\"webPublicationDate\":\"2020-10-09T06:00:00Z\",\"webTitle\":\"US election briefing for Australia: Kidnap plot charges sharpen fears of election unrest\",\"webUrl\":\"https://www.theguardian.com/australia-news/2020/oct/09/kidnap-plot-charges-sharpen-fears-of-election-unrest\",\"apiUrl\":\"https://content.guardianapis.com/australia-news/2020/oct/09/kidnap-plot-charges-sharpen-fears-of-election-unrest\",\"isHosted\":false,\"pillarId\":\"pillar/news\",\"pillarName\":\"News\"},{\"id\":\"film/2020/oct/22/borat-v-trump-can-entertainment-really-affect-an-election\",\"type\":\"article\",\"sectionId\":\"film\",\"sectionName\":\"Film\",\"webPublicationDate\":\"2020-10-22T06:10:18Z\",\"webTitle\":\"Borat v Trump: can entertainment really affect an election?\",\"webUrl\":\"https://www.theguardian.com/film/2020/oct/22/borat-v-trump-can-entertainment-really-affect-an-election\",\"apiUrl\":\"https://content.guardianapis.com/film/2020/oct/22/borat-v-trump-can-entertainment-really-affect-an-election\",\"isHosted\":false,\"pillarId\":\"pillar/arts\",\"pillarName\":\"Arts\"},{\"id\":\"world/2020/oct/19/bolivia-election-exit-polls-suggest-thumping-win-evo-morales-party-luis-arce\",\"type\":\"article\",\"sectionId\":\"world\",\"sectionName\":\"World news\",\"webPublicationDate\":\"2020-10-19T16:13:40Z\",\"webTitle\":\"Bolivia election: Evo Morales's leftwing party celebrates stunning comeback\",\"webUrl\":\"https://www.theguardian.com/world/2020/oct/19/bolivia-election-exit-polls-suggest-thumping-win-evo-morales-party-luis-arce\",\"apiUrl\":\"https://content.guardianapis.com/world/2020/oct/19/bolivia-election-exit-polls-suggest-thumping-win-evo-morales-party-luis-arce\",\"isHosted\":false,\"pillarId\":\"pillar/news\",\"pillarName\":\"News\"},{\"id\":\"news/2020/oct/21/the-worlds-election-inside-the-23-october-guardian-weekly\",\"type\":\"article\",\"sectionId\":\"news\",\"sectionName\":\"News\",\"webPublicationDate\":\"2020-10-21T08:00:30Z\",\"webTitle\":\"The world's election – inside the 23 October Guardian Weekly\",\"webUrl\":\"https://www.theguardian.com/news/2020/oct/21/the-worlds-election-inside-the-23-october-guardian-weekly\",\"apiUrl\":\"https://content.guardianapis.com/news/2020/oct/21/the-worlds-election-inside-the-23-october-guardian-weekly\",\"isHosted\":false,\"pillarId\":\"pillar/news\",\"pillarName\":\"News\"},{\"id\":\"world/2020/oct/18/jacinda-ardern-eases-into-second-term-amid-relief-in-new-zealand-at-election-landslide\",\"type\":\"article\",\"sectionId\":\"world\",\"sectionName\":\"World news\",\"webPublicationDate\":\"2020-10-18T04:37:11Z\",\"webTitle\":\"Jacinda Ardern considers coalition despite New Zealand election landslide\",\"webUrl\":\"https://www.theguardian.com/world/2020/oct/18/jacinda-ardern-eases-into-second-term-amid-relief-in-new-zealand-at-election-landslide\",\"apiUrl\":\"https://content.guardianapis.com/world/2020/oct/18/jacinda-ardern-eases-into-second-term-amid-relief-in-new-zealand-at-election-landslide\",\"isHosted\":false,\"pillarId\":\"pillar/news\",\"pillarName\":\"News\"},{\"id\":\"us-news/2020/oct/16/first-thing-election-special-crazy-uncle-vs-twinkly-grandpa\",\"type\":\"article\",\"sectionId\":\"us-news\",\"sectionName\":\"US news\",\"webPublicationDate\":\"2020-10-16T10:22:52Z\",\"webTitle\":\"Crazy uncle vs twinkly grandpa | First Thing election special\",\"webUrl\":\"https://www.theguardian.com/us-news/2020/oct/16/first-thing-election-special-crazy-uncle-vs-twinkly-grandpa\",\"apiUrl\":\"https://content.guardianapis.com/us-news/2020/oct/16/first-thing-election-special-crazy-uncle-vs-twinkly-grandpa\",\"isHosted\":false,\"pillarId\":\"pillar/news\",\"pillarName\":\"News\"},{\"id\":\"us-news/2020/oct/10/republicans-presidential-election-fears-biden-trump\",\"type\":\"article\",\"sectionId\":\"us-news\",\"sectionName\":\"US news\",\"webPublicationDate\":\"2020-10-11T07:10:27Z\",\"webTitle\":\"Republicans express fears Donald Trump will lose presidential election\",\"webUrl\":\"https://www.theguardian.com/us-news/2020/oct/10/republicans-presidential-election-fears-biden-trump\",\"apiUrl\":\"https://content.guardianapis.com/us-news/2020/oct/10/republicans-presidential-election-fears-biden-trump\",\"isHosted\":false,\"pillarId\":\"pillar/news\",\"pillarName\":\"News\"}]}}";
-
+    /** tag for logging messages */
+  private static final String LOG_TAG = Utility.class.getSimpleName();
+    /**
+     * create a constructor object, private.
+     * Holds static variables and methods accessed by the class.
+     */
     private Utility() {
-
     }
 
-    public static ArrayList<NewsStory> extractStory() {
-        // Create an empty ArrayList that we can start adding storys to
-        ArrayList<NewsStory> stories = new ArrayList<>();
-        // Try to parse the SAMPLE_JSON_RESPONSE. If there's a problem with the way the JSON
-//      // is formatted, a JSONException exception object will be thrown.
+    /**
+     * Query the API and return a list of {@link NewsStory} objects.
+     */
+    public static List<NewsStory> fetchGuardianData(String requestUrl){
+        //create URL object
+        URL url;
+        url = createUrl(requestUrl);
+
+        //Perform request and receive JSON
+        String jsonResponse = null;
+        try {
+            jsonResponse = makeHttpRequest(url);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Problem making the HTTP request.", e);
+        }
+        // Extract relevant fields from the JSON response and create a list of {@link NewsStory}s
+        List<NewsStory> stories = extractStory(jsonResponse);
+
+        return stories;
+    }
+    /**
+     * Return a new URL object from string URL.
+     */
+
+    private static URL createUrl(String stringUrl) {
+        URL url = null;
+        try {
+            url = new URL(stringUrl);
+        } catch (MalformedURLException e) {
+            Log.e(LOG_TAG, "Problem building the URL ", e);
+        }
+        return url;
+    }
+    /**
+     * Make an HTTP request to the URL and return a String response.
+     */
+    private static String makeHttpRequest(URL url) throws IOException {
+        String jsonResponse = "";
+
+        // if URL is null, leave early.
+        if (url == null) {
+            return jsonResponse;
+        }
+
+        HttpURLConnection urlConnection = null;
+        InputStream inputStream = null;
+        try {
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setReadTimeout(10000 /* milliseconds */);
+            urlConnection.setConnectTimeout(15000 /* milliseconds */);
+            urlConnection.setRequestMethod("GET");
+            urlConnection.connect();
+
+            // if the request worked, 200. Then reads input stream and parses response.
+            if (urlConnection.getResponseCode() == 200) {
+                inputStream = urlConnection.getInputStream();
+                jsonResponse = readFromStream(inputStream);
+            } else {
+                Log.e(LOG_TAG, "Error response code: " + urlConnection.getResponseCode());
+            }
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Problem retrieving the story JSON results.", e);
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+            if (inputStream != null) {
+                // Closing the input stream could throw an IOException, which is why
+                // the makeHttpRequest(URL url) method signature specifies than an IOException
+                // could be thrown.
+                inputStream.close();
+            }
+        }
+        return jsonResponse;
+    }
+    /**
+     * Convert the {@link InputStream} into a String which contains the
+     * whole JSON response from the server.
+     */
+
+    private static String readFromStream(InputStream inputStream) throws IOException {
+        StringBuilder output = new StringBuilder();
+        if (inputStream != null) {
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charset.forName("UTF-8"));
+            BufferedReader reader = new BufferedReader(inputStreamReader);
+            String line = reader.readLine();
+            while (line != null) {
+                output.append(line);
+                line = reader.readLine();
+            }
+        }
+        return output.toString();
+    }
+    /**
+     * Return a list of stories from parsing the JSON.
+     */
+    public static List<NewsStory> extractStory(String cyberpunkJSON) {
+        //if string is empty or null, get out.
+        if (TextUtils.isEmpty(cyberpunkJSON)) {
+            return null;
+        }
+
+        // Create an ArrayList that we can start adding stories to0
+        List<NewsStory> stories = new ArrayList<>();
+        // Try to parse the JSON. If there's a problem a JSONException will be thrown.
 //      // Catch the exception so the app doesn't crash, and print the error message to the logs.
         try {
-            JSONObject baseJsonResponse = new JSONObject(SAMPLE_JSON_RESPONSE);
+            //create JSOn object from the response string
+            JSONObject baseJsonResponse = new JSONObject(cyberpunkJSON);
 
             JSONObject response = baseJsonResponse.getJSONObject("response");
             JSONArray resultsArray = response.getJSONArray("results");
@@ -51,12 +168,13 @@ public final class Utility {
                 }
             }
         } catch (JSONException e) {
-            // If an error is thrown when executing any of the above statements in the "try" block,
-            // catch the exception here, so the app doesn't crash. Print a log message
-            // with the message from the exception.
+            // If an error is thrown wihe "try" block, catch the exception,
+            // so the app doesn't crash. Print a log message from the exception.
             Log.e("QueryUtils", "Problem parsing the JSON results", e);
         } finally {
+            //return a list of stories
             return stories;
         }
     }
+
 }
