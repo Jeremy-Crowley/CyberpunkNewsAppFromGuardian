@@ -2,8 +2,11 @@ package com.example.android.cyberpunknewsappfromguardian;
 
 import android.app.LoaderManager;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -22,8 +25,8 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
     private static final String LOG_TAG = MainActivity.class.getName();
 
     private static final int PUNK_LOADER_ID = 1;
-    public static final String GUARDIAN_REQUEST_URL =
-            "https://content.guardianapis.com/search?q=cyberpunk&show-tags=contributor&limit=10&api-key=255dafbf-d5d8-4420-8d76-fec56b5a3b37";
+    public static final String GUARDIAN_REQUEST_URL ="https://content.guardianapis.com/search?q=cyberpunk&show-tags=contributor&order-by=newest&page-size=15&api-key=255dafbf-d5d8-4420-8d76-fec56b5a3b37\n";
+
     private StoryAdapter mAdapter;
 
     @Override
@@ -54,8 +57,24 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
                 startActivity(websiteIntent);
             }
         });
-        LoaderManager loaderManager = getLoaderManager();
-        loaderManager.initLoader(PUNK_LOADER_ID, null, this);
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+
+
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+
+        if (networkInfo != null && networkInfo.isConnected()) {
+
+            LoaderManager loaderManager = getLoaderManager();
+            loaderManager.initLoader(PUNK_LOADER_ID, null, this);
+        }
+        else {
+
+            View loadingIndicator = findViewById(R.id.progressLoad);
+            loadingIndicator.setVisibility(View.GONE);
+            mEmptyStateTextView.setText(R.string.no_internet_connection);
+        }
 
     }
     private TextView mEmptyStateTextView;
@@ -69,6 +88,8 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
     @Override
     public void onLoadFinished(Loader<List<NewsStory>> loader, List<NewsStory> stories) {
         mEmptyStateTextView.setText(R.string.noNewSamurai);
+        View visual_load = findViewById(R.id.progressLoad);
+        visual_load.setVisibility(View.GONE);
             mAdapter.clear();
             if (stories != null && !stories.isEmpty()){
                 mAdapter.addAll(stories);

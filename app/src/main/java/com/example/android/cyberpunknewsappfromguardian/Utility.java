@@ -25,8 +25,11 @@ import java.util.List;
  * helper methods related to requesting and receiving news storys from the Guardian API
  */
 public final class Utility {
-    /** tag for logging messages */
-  private static final String LOG_TAG = Utility.class.getSimpleName();
+    /**
+     * tag for logging messages
+     */
+    private static final String LOG_TAG = Utility.class.getSimpleName();
+
     /**
      * create a constructor object, private.
      * Holds static variables and methods accessed by the class.
@@ -37,7 +40,7 @@ public final class Utility {
     /**
      * Query the API and return a list of {@link NewsStory} objects.
      */
-    public static List<NewsStory> fetchGuardianData(String requestUrl){
+    public static List<NewsStory> fetchGuardianData(String requestUrl) {
         //create URL object
         URL url;
         url = createUrl(requestUrl);
@@ -54,6 +57,7 @@ public final class Utility {
 
         return stories;
     }
+
     /**
      * Return a new URL object from string URL.
      */
@@ -67,6 +71,7 @@ public final class Utility {
         }
         return url;
     }
+
     /**
      * Make an HTTP request to the URL and return a String response.
      */
@@ -109,6 +114,7 @@ public final class Utility {
         }
         return jsonResponse;
     }
+
     /**
      * Convert the {@link InputStream} into a String which contains the
      * whole JSON response from the server.
@@ -127,6 +133,7 @@ public final class Utility {
         }
         return output.toString();
     }
+
     /**
      * Return a list of stories from parsing the JSON.
      */
@@ -168,12 +175,12 @@ public final class Utility {
                             .getString("webPublicationDate")
                             .replace("T", "  ")
                             .replace("Z", " ");
-                    SimpleDateFormat parser = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss");
+                    SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
                     try {
                         Date parsedDate = parser.parse(date);
                         String formattedDate = formatter.format(parsedDate);
-                        NewsStory story = new NewsStory(title, author,  formattedDate, webAddress, section);
+                        NewsStory story = new NewsStory(title, author, formattedDate, webAddress, section);
                         stories.add(story);
 
                     } catch (ParseException e) {
@@ -192,5 +199,4 @@ public final class Utility {
             return stories;
         }
     }
-
 }
