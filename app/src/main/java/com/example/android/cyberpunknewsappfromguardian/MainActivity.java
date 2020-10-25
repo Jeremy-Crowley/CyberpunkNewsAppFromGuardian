@@ -1,9 +1,10 @@
 package com.example.android.cyberpunknewsappfromguardian;
 
-import android.app.Activity;
+import android.app.LoaderManager;
+import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Intent;
+import android.content.Loader;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,8 +15,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity implements LoaderCallbacks<List<NewsStory>> {
+
     private static final String LOG_TAG = MainActivity.class.getName();
+
+    private static final int PUNK_LOADER_ID = 1;
     public static final String GUARDIAN_REQUEST_URL =
             "https://content.guardianapis.com/search?q=cyberpunk&show-tags=contributor&limit=10&api-key=255dafbf-d5d8-4420-8d76-fec56b5a3b37";
     private StoryAdapter mAdapter;
@@ -26,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-       ListView storyListView = findViewById(R.id.frontListView);
+        ListView storyListView = findViewById(R.id.frontListView);
 
         mAdapter = new StoryAdapter(this, new ArrayList<NewsStory>());
 
@@ -37,37 +42,33 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int click, long id) {
 
-                NewsStory thisStory= (NewsStory) mAdapter.getItem(click);
+                NewsStory thisStory = (NewsStory) mAdapter.getItem(click);
                 assert thisStory != null;
                 Uri newsUri = Uri.parse(thisStory.getURL());
                 Intent websiteIntent = new Intent(Intent.ACTION_VIEW, newsUri);
                 startActivity(websiteIntent);
             }
         });
-        CyberAsyncTask task = new CyberAsyncTask();
-        task.execute(GUARDIAN_REQUEST_URL);
+        LoaderManager loaderManager = getLoaderManager();
+        loaderManager.initLoader(PUNK_LOADER_ID, null, this);
 
     }
 
-    private class CyberAsyncTask extends AsyncTask<String, Void, List<NewsStory>> {
+    @Override
+    public Loader<List<NewsStory>> onCreateLoader(int i, Bundle bundle) {
+        return new PunkLoader(this, GUARDIAN_REQUEST_URL);
+    }
 
-        @Override
-        protected List<NewsStory> doInBackground(String... urls) {
-            if (urls.length < 1 || urls[0] == null) {
-                return null;
-            }
-            List<NewsStory> result = Utility.fetchGuardianData(urls[0]);
-            return result;
-        }
+    @Override
+    public void onLoadFinished(Loader<List<NewsStory>> loader, List<NewsStory> stories) {
 
-        @Override
-        protected void onPostExecute(List<NewsStory> data) {
             mAdapter.clear();
-            if (data != null && !data.isEmpty()) {
-                mAdapter.addAll(data);
+            if (stories != null && !stories.isEmpty()){
+                mAdapter.addAll(stories);
             }
-        }
-
-
+    }
+    @Override
+    public void onLoaderReset(Loader<List<NewsStory>> loader){
+        mAdapter.clear();
     }
 }
