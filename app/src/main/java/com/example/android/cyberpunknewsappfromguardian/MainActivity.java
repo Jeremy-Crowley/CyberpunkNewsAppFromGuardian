@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -29,13 +30,17 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mEmptyStateTextView = findViewById(R.id.emptyView);
+
 
 
         ListView storyListView = findViewById(R.id.frontListView);
+        storyListView.setEmptyView(mEmptyStateTextView);
 
         mAdapter = new StoryAdapter(this, new ArrayList<NewsStory>());
 
         storyListView.setAdapter(mAdapter);
+
 
 
         storyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -53,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
         loaderManager.initLoader(PUNK_LOADER_ID, null, this);
 
     }
+    private TextView mEmptyStateTextView;
+
 
     @Override
     public Loader<List<NewsStory>> onCreateLoader(int i, Bundle bundle) {
@@ -61,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
 
     @Override
     public void onLoadFinished(Loader<List<NewsStory>> loader, List<NewsStory> stories) {
-
+        mEmptyStateTextView.setText(R.string.noNewSamurai);
             mAdapter.clear();
             if (stories != null && !stories.isEmpty()){
                 mAdapter.addAll(stories);

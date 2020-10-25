@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CyberpunkNewsAppFromGuardian</string>
+    <string name="noNewSamurai">There is no news Samurai</string>
 </resources>
