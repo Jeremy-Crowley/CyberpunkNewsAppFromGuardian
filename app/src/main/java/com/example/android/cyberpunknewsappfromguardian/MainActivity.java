@@ -88,14 +88,15 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
 
         Uri.Builder uriMaker = new Uri.Builder();
         uriMaker.scheme("https").authority("content.guardianapis.com");
-        uriMaker.appendQueryParameter("search?q", "cyberpunk");
+        uriMaker.appendPath("search");
+        uriMaker.appendQueryParameter("q", "cyberpunk");
         uriMaker.appendQueryParameter("show-tags", "contributor");
         uriMaker.appendQueryParameter("order-by", "newest");
         uriMaker.appendQueryParameter("page-size","15");
-        uriMaker.appendQueryParameter("api-key", "255dafbf-d5d8-4420-8d76-fec56b5a3b37");
+        uriMaker.appendQueryParameter("api-key", "test");
+        System.out.println(uriMaker);
 
-
-        //=cyberpunk&show-tags=contributor&order-by=newest&page-size=15&api-key=255dafbf-d5d8-4420-8d76-fec56b5a3b37
+       
         return new PunkLoader(this, uriMaker.toString());
     }
 
