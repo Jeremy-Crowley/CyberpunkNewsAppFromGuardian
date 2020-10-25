@@ -5,10 +5,12 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -25,7 +27,8 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
     private static final String LOG_TAG = MainActivity.class.getName();
 
     private static final int PUNK_LOADER_ID = 1;
-    public static final String GUARDIAN_REQUEST_URL ="https://content.guardianapis.com/search?q=cyberpunk&show-tags=contributor&order-by=newest&page-size=15&api-key=255dafbf-d5d8-4420-8d76-fec56b5a3b37\n";
+    public static final String GUARDIAN_REQUEST_URL ="";
+
 
     private StoryAdapter mAdapter;
 
@@ -82,7 +85,18 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
 
     @Override
     public Loader<List<NewsStory>> onCreateLoader(int i, Bundle bundle) {
-        return new PunkLoader(this, GUARDIAN_REQUEST_URL);
+
+        Uri.Builder uriMaker = new Uri.Builder();
+        uriMaker.scheme("https").authority("content.guardianapis.com");
+        uriMaker.appendQueryParameter("search?q", "cyberpunk");
+        uriMaker.appendQueryParameter("show-tags", "contributor");
+        uriMaker.appendQueryParameter("order-by", "newest");
+        uriMaker.appendQueryParameter("page-size","15");
+        uriMaker.appendQueryParameter("api-key", "255dafbf-d5d8-4420-8d76-fec56b5a3b37");
+
+
+        //=cyberpunk&show-tags=contributor&order-by=newest&page-size=15&api-key=255dafbf-d5d8-4420-8d76-fec56b5a3b37
+        return new PunkLoader(this, uriMaker.toString());
     }
 
     @Override
