@@ -15,7 +15,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -161,10 +164,23 @@ public final class Utility {
 
                     String webAddress = currentNewsStory.getString("webUrl");
                     String section = currentNewsStory.getString("sectionName");
-                    String date = currentNewsStory.getString("webPublicationDate");
+                    String date = currentNewsStory
+                            .getString("webPublicationDate")
+                            .replace("T", "  ")
+                            .replace("Z", " ");
+                    SimpleDateFormat parser = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss");
+                    SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+                    try {
+                        Date parsedDate = parser.parse(date);
+                        String formattedDate = formatter.format(parsedDate);
+                        NewsStory story = new NewsStory(title, author,  formattedDate, webAddress, section);
+                        stories.add(story);
 
-                    NewsStory story = new NewsStory(title, author,  date, webAddress, section);
-                    stories.add(story);
+                    } catch (ParseException e) {
+                        System.out.println("date parse failure");
+                    }
+
+
                 }
             }
         } catch (JSONException e) {
